@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "ES2022",
+    "esModuleInterop": true,
+    "target": "ES2022",
+    "moduleResolution": "node"
+  },
+  "include": ["client/**/*", "server/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
