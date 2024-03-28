@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
-
+import { noise } from '@chainsafe/libp2p-noise';
+import { yamux } from '@chainsafe/libp2p-yamux';
 import { createFromJSON } from "@libp2p/peer-id-factory";
 import { multiaddr } from "@multiformats/multiaddr";
 import peerIdDialerJson from "./peerIds/peer-id-dialer.js";
@@ -23,6 +24,12 @@ async function run() {
     addresses: {
       listen: ["/ip4/0.0.0.0/tcp/0"],
     },
+    streamMuxers: [
+      yamux()
+    ],
+    connectionEncryption: [
+      noise()
+    ]
   });
 
   // Output this node's address
@@ -38,6 +45,8 @@ async function run() {
   // Send stdin to the stream
   // Read the stream and output to console
   streamToConsole(streamRelay);
+
+  
   // streamRelay.sink()
 }
 

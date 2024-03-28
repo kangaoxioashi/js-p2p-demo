@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
-
+import { noise } from '@chainsafe/libp2p-noise';
+import { yamux } from '@chainsafe/libp2p-yamux';
 import { createFromJSON } from "@libp2p/peer-id-factory";
 import peerIdRelayJson from "./peerIds/peer-id-relay.js";
 import {
@@ -21,6 +22,12 @@ async function run() {
     addresses: {
       listen: ["/ip4/0.0.0.0/tcp/10333"], //
     },
+    streamMuxers: [
+      yamux()
+    ],
+    connectionEncryption: [
+      noise()
+    ]
   });
 
   // Log a message when a remote peer connects to us
