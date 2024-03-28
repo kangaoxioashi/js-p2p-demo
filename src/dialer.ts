@@ -1,15 +1,18 @@
 /* eslint-disable no-console */
-import { noise } from '@chainsafe/libp2p-noise';
-import { yamux } from '@chainsafe/libp2p-yamux';
+import { noise } from "@chainsafe/libp2p-noise";
+import { yamux } from "@chainsafe/libp2p-yamux";
 import { createFromJSON } from "@libp2p/peer-id-factory";
 import { multiaddr } from "@multiformats/multiaddr";
 import peerIdDialerJson from "./peerIds/peer-id-dialer.js";
 import peerIdRelayJson from "./peerIds/peer-id-relay.js";
-import { stdinToStream, streamToConsole } from "./utils/stream.js";
+import {
+  getStreamMsg,
+  stdinToStream,
+  streamToConsole,
+} from "./utils/stream.js";
 import { createLibp2p } from "libp2p";
 import { tcp } from "@libp2p/tcp";
 import { relayIpAddress } from "./utils/index.js";
-
 
 async function run() {
   const [idDialer, idRelay] = await Promise.all([
@@ -24,12 +27,8 @@ async function run() {
     addresses: {
       listen: ["/ip4/0.0.0.0/tcp/0"],
     },
-    streamMuxers: [
-      yamux()
-    ],
-    connectionEncryption: [
-      noise()
-    ]
+    streamMuxers: [yamux()],
+    connectionEncryption: [noise()],
   });
 
   // Output this node's address
@@ -40,13 +39,17 @@ async function run() {
 
   // Dial to the relay
   const relayMa = multiaddr(`${relayIpAddress}${idRelay.toString()}`);
-  const streamRelay = await nodeDialer.dialProtocol(relayMa, "/relay/dialer/1.0.0");
+  const streamRelay = await nodeDialer.dialProtocol(
+    relayMa,
+    "/relay/dialer/1.0.0"
+  );
 
   // Send stdin to the stream
   // Read the stream and output to console
   streamToConsole(streamRelay);
+  // const msgs = await getStreamMsg(streamRelay);
+  // console.log("111msg", msgs);
 
-  
   // streamRelay.sink()
 }
 

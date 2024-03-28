@@ -1,13 +1,13 @@
 {
+  "type": "module",
   "name": "js-p2p-demo",
   "version": "1.0.0",
   "description": "p2p demo",
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "relay": "node relay.js",
-    "dialer": "node dialer.js",
-    "listener": "node listener.js",
+    "relay": "node ./dist/relay.js",
+    "dialer": "node ./dist/dialer.js",
+    "listener": "node ./dist/listener.js",
     "watch": "tsc -w",
     "build": "tsc"
   },
