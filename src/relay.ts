@@ -2,14 +2,21 @@
 
 import { createFromJSON } from "@libp2p/peer-id-factory";
 import peerIdRelayJson from "./peerIds/peer-id-relay.js";
-import { stdinToStream, streamToConsole } from "./stream.js";
+import {
+  stdinToStream,
+  streamToConsole,
+  postStreamMsg,
+} from "./utils/stream.js";
 import { createLibp2p } from "libp2p";
 import { tcp } from "@libp2p/tcp";
+import { IncomingStreamData } from "@libp2p/interface";
 
+// store all listener
+const listenerIpAddress: string[] = [];
 async function run() {
   // Create a new libp2p node with the given multi-address
   const idRelay = await createFromJSON(peerIdRelayJson);
-  const nodeListener = await createLibp2p({
+  const nodeRelayer = await createLibp2p({
     transports: [tcp()],
     peerId: idRelay,
     addresses: {
@@ -18,32 +25,35 @@ async function run() {
   });
 
   // Log a message when a remote peer connects to us
-  nodeListener.addEventListener("peer:connect", (evt) => {
+  nodeRelayer.addEventListener("peer:connect", (evt) => {
     const remotePeer = evt.detail;
     console.log("connected to: ", remotePeer.toString());
   });
 
   //1.  Handle messages for the listener protocol
-  const streamListener = await new Promise(async (resolve, reject) => {
-    await nodeListener.handle(
-      "/relay/listener/1.0.0",
-      async ({ stream: streamListener }) => {
-        streamToConsole(streamListener);
-        resolve(streamListener);
-      }
-    );
-  });
+  await nodeRelayer.handle(
+    "/relay/listener/1.0.0",
+    async ({ stream, connection }) => {
+      streamToConsole(stream);
+      console.log('111listener', connection.remoteAddr.toString())
+      listenerIpAddress.push(connection.remoteAddr.toString());
+    }
+  );
   //2. Handle messages for the dialer protocol
-  await nodeListener.handle(
+  await nodeRelayer.handle(
     "/relay/dialer/1.0.0",
     async ({ stream: streamDialer }) => {
       // Read the stream and output to console
       streamToConsole(streamDialer);
+      const length = listenerIpAddress.length;
+      // todo 算法获取一个listener
+      const index = Math.floor(Math.random() * length);
+      postStreamMsg(streamDialer, listenerIpAddress[index]);
     }
   );
   // Output listen addresses to the console
   console.log("Listener ready, listening on:");
-  nodeListener.getMultiaddrs().forEach((ma) => {
+  nodeRelayer.getMultiaddrs().forEach((ma) => {
     console.log(ma.toString());
   });
 }

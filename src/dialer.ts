@@ -7,7 +7,7 @@ import peerIdRelayJson from "./peerIds/peer-id-relay.js";
 import { stdinToStream, streamToConsole } from "./utils/stream.js";
 import { createLibp2p } from "libp2p";
 import { tcp } from "@libp2p/tcp";
-import { relayIpAddress } from "./utils";
+import { relayIpAddress } from "./utils/index.js";
 
 
 async function run() {
@@ -34,11 +34,11 @@ async function run() {
   // Dial to the relay
   const relayMa = multiaddr(`${relayIpAddress}${idRelay.toString()}`);
   const streamRelay = await nodeDialer.dialProtocol(relayMa, "/relay/dialer/1.0.0");
-  
+
   // Send stdin to the stream
   // Read the stream and output to console
   streamToConsole(streamRelay);
-  streamRelay.sink()
+  // streamRelay.sink()
 }
 
 run();
