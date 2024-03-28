@@ -65,5 +65,5 @@ export async function getStreamMsg(stream) {
 
 export function postStreamMsg(stream, msg) {
   const content = uint8ArrayFromString(msg);
-  stream.sink(lp.encode(content));
+  stream.sink(lp.encode([content]));
 }

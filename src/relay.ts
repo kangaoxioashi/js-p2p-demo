@@ -9,7 +9,6 @@ import {
 } from "./utils/stream.js";
 import { createLibp2p } from "libp2p";
 import { tcp } from "@libp2p/tcp";
-import { IncomingStreamData } from "@libp2p/interface";
 
 // store all listener
 const listenerIpAddress: string[] = [];
@@ -52,7 +51,7 @@ async function run() {
     }
   );
   // Output listen addresses to the console
-  console.log("Listener ready, listening on:");
+  console.log("Relay ready, listening on:");
   nodeRelayer.getMultiaddrs().forEach((ma) => {
     console.log(ma.toString());
   });

@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "p2p demo",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "server": "",
-    "client": "",
+    "relay": "node relay.js",
+    "dialer": "node dialer.js",
+    "listener": "node listener.js",
     "watch": "tsc -w",
     "build": "tsc"
   },
