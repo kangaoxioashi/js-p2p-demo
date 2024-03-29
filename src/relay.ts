@@ -57,7 +57,8 @@ async function run() {
         const index = Math.floor(Math.random() * length);
         const streamListener = listenerStream[index]?.stream;
         // transform message to listener
-        dialMsg && streamListener && postStreamMsg(streamListener, dialMsg);
+        console.log("111dialMsg", dialMsg);
+        streamListener && postStreamMsg(streamListener, dialMsg);
       });
     }
   );

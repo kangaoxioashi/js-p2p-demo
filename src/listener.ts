@@ -40,7 +40,7 @@ async function run() {
   });
   getStreamMsg(stream, (message) => {
     console.log("111msgs", message);
-    postStreamMsg(stream, "from listener hello world");
+    postStreamMsg(stream, "hello world->" + message);
   });
 }
 

@@ -21,6 +21,11 @@ export function stdinToStream(stream) {
   );
 }
 
+export function postStreamMsg(stream, msg) {
+  const content = uint8ArrayFromString(msg);
+  stream.sink(lp.encode(Array.isArray(content) ? content : [content]));
+}
+
 export function streamToConsole(stream) {
   pipe(
     // Read from the stream (the source)
@@ -52,17 +57,15 @@ export async function getStreamMsg(stream, callback) {
     // Sink function
     async function (source) {
       // For each chunk of data
+      const values = [];
       for await (const msg of source) {
         // Output the data as a utf8 string
         const message = msg.toString().replace("\n", "");
         console.log("11> " + message);
         callback && callback(message);
+        values.push(message);
       }
+      console.log("111eend", values);
     }
   );
-}
-
-export function postStreamMsg(stream, msg) {
-  const content = uint8ArrayFromString(msg);
-  stream.sink(lp.encode(Array.isArray(content) ? content : [content]));
 }
