@@ -36,12 +36,13 @@ export function streamToConsole(stream) {
         // Output the data as a utf8 string
         console.log("> " + msg.toString().replace("\n", ""));
       }
+      console.log("111consoleend");
     }
   );
 }
 
-export async function getStreamMsg(stream) {
-  return await pipe(
+export async function getStreamMsg(stream, callback) {
+  pipe(
     // Read from the stream (the source)
     stream.source,
     // Decode length-prefixed data
@@ -51,19 +52,17 @@ export async function getStreamMsg(stream) {
     // Sink function
     async function (source) {
       // For each chunk of data
-      const msgs = [];
       for await (const msg of source) {
         // Output the data as a utf8 string
         const message = msg.toString().replace("\n", "");
-        console.log("> " + message);
-        msgs.push(message);
+        console.log("11> " + message);
+        callback && callback(message);
       }
-      return msgs;
     }
   );
 }
 
 export function postStreamMsg(stream, msg) {
   const content = uint8ArrayFromString(msg);
-  stream.sink(lp.encode([content]));
+  stream.sink(lp.encode(Array.isArray(content) ? content : [content]));
 }

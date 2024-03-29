@@ -1,18 +1,20 @@
 /* eslint-disable no-console */
-import { noise } from '@chainsafe/libp2p-noise';
-import { yamux } from '@chainsafe/libp2p-yamux';
+import { noise } from "@chainsafe/libp2p-noise";
+import { yamux } from "@chainsafe/libp2p-yamux";
 import { createFromJSON } from "@libp2p/peer-id-factory";
 import peerIdRelayJson from "./peerIds/peer-id-relay.js";
 import {
   stdinToStream,
   streamToConsole,
   postStreamMsg,
+  getStreamMsg,
 } from "./utils/stream.js";
 import { createLibp2p } from "libp2p";
 import { tcp } from "@libp2p/tcp";
+import { IncomingStreamData } from "@libp2p/interface";
 
 // store all listener
-const listenerIpAddress: string[] = [];
+const listenerStream: IncomingStreamData[] = [];
 async function run() {
   // Create a new libp2p node with the given multi-address
   const idRelay = await createFromJSON(peerIdRelayJson);
@@ -20,14 +22,10 @@ async function run() {
     transports: [tcp()],
     peerId: idRelay,
     addresses: {
-      listen: ["/ip4/0.0.0.0/tcp/10333"], //
+      listen: ["/ip4/0.0.0.0/tcp/10334"], //
     },
-    streamMuxers: [
-      yamux()
-    ],
-    connectionEncryption: [
-      noise()
-    ]
+    streamMuxers: [yamux()],
+    connectionEncryption: [noise()],
   });
 
   // Log a message when a remote peer connects to us
@@ -37,24 +35,31 @@ async function run() {
   });
 
   //1.  Handle messages for the listener protocol
-  await nodeRelayer.handle(
-    "/relay/listener/1.0.0",
-    async ({ stream, connection }) => {
-      streamToConsole(stream);
-      console.log('111listener', connection.remoteAddr.toString())
-      listenerIpAddress.push(connection.remoteAddr.toString());
-    }
-  );
+  await nodeRelayer.handle("/relay/listener/1.0.0", async (data) => {
+    streamToConsole(data.stream);
+    listenerStream.push(data);
+    console.log("1111listern");
+    // listern
+    // const listenerMsg = await getStreamMsg(data.stream);
+    // console.log("111listenerMsg", listenerMsg);
+    //  postStreamMsg(streamDialer, listenerMsg);
+  });
   //2. Handle messages for the dialer protocol
   await nodeRelayer.handle(
     "/relay/dialer/1.0.0",
     async ({ stream: streamDialer }) => {
       // Read the stream and output to console
-      streamToConsole(streamDialer);
-      const length = listenerIpAddress.length;
-      // todo 算法获取一个listener
+      // streamToConsole(streamDialer);
+
+      const length = listenerStream.length;
+      // todo mock algorithm to choose one listener
       const index = Math.floor(Math.random() * length);
-      postStreamMsg(streamDialer, listenerIpAddress[index]);
+      getStreamMsg(streamDialer, (dialMsg) => {
+        console.log("111dialMsg", dialMsg);
+        // transform message to listener
+        const streamListener = listenerStream[index]?.stream;
+        streamListener && postStreamMsg(streamListener, dialMsg);
+      });
     }
   );
   // Output listen addresses to the console

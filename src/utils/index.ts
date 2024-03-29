@@ -1,1 +1,1 @@
-export const relayIpAddress = `/ip4/127.0.0.1/tcp/10333/p2p/`;
+export const relayIpAddress = `/ip4/127.0.0.1/tcp/10334/p2p/`;

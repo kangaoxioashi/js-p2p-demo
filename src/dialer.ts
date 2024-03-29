@@ -39,17 +39,14 @@ async function run() {
 
   // Dial to the relay
   const relayMa = multiaddr(`${relayIpAddress}${idRelay.toString()}`);
-  const streamRelay = await nodeDialer.dialProtocol(
-    relayMa,
-    "/relay/dialer/1.0.0"
-  );
+  const stream = await nodeDialer.dialProtocol(relayMa, "/relay/dialer/1.0.0");
 
-  // Send stdin to the stream
-  // Read the stream and output to console
-  streamToConsole(streamRelay);
-  // const msgs = await getStreamMsg(streamRelay);
-  // console.log("111msg", msgs);
-
+  //  get listener address
+  stdinToStream(stream);
+  streamToConsole(stream);
+  getStreamMsg(stream, (message) => {
+    console.log("111msg", message);
+  });
   // streamRelay.sink()
 }
 

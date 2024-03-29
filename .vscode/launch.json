@@ -5,10 +5,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "command": "npm run relay",
+      "name": "Run Relay",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "npm run dialer",
       "name": "Run Dial",
       "request": "launch",
       "type": "node-terminal"
-    },
+    }
   ]
 }
