@@ -8,10 +8,10 @@ import peerIdRelayJson from "./peerIds/peer-id-relay.js";
 import {
   getStreamMsg,
   stdinToStream,
-  streamToConsole,
 } from "./utils/stream.js";
 import { createLibp2p } from "libp2p";
 import { tcp } from "@libp2p/tcp";
+import { webSockets } from "@libp2p/websockets";
 import { relayIpAddress } from "./utils/index.js";
 
 async function run() {
@@ -22,7 +22,7 @@ async function run() {
 
   // Create a new libp2p node on localhost with a randomly chosen port
   const nodeDialer = await createLibp2p({
-    transports: [tcp()],
+    transports: [tcp(), webSockets()],
     peerId: idDialer,
     addresses: {
       listen: ["/ip4/0.0.0.0/tcp/0"],
@@ -43,9 +43,10 @@ async function run() {
 
   //  get listener address
   stdinToStream(stream);
-  streamToConsole(stream);
+  // streamToConsole(stream);
+
   getStreamMsg(stream, (message) => {
-    console.log("111msg", message);
+    console.log("111dailermsg", message);
   });
   // streamRelay.sink()
 }

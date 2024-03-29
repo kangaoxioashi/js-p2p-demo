@@ -15,6 +15,12 @@
       "name": "Run Dial",
       "request": "launch",
       "type": "node-terminal"
+    },
+    {
+      "command": "npm run listener",
+      "name": "Run Listener",
+      "request": "launch",
+      "type": "node-terminal"
     }
   ]
 }

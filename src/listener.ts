@@ -4,6 +4,7 @@ import { yamux } from "@chainsafe/libp2p-yamux";
 import { createFromJSON } from "@libp2p/peer-id-factory";
 import { createLibp2p } from "libp2p";
 import { tcp } from "@libp2p/tcp";
+import { webSockets } from "@libp2p/websockets";
 import peerIdRelayJson from "./peerIds/peer-id-relay.js";
 import { multiaddr } from "@multiformats/multiaddr";
 import {
@@ -20,7 +21,7 @@ async function run() {
   const listernPort = generatePort(10000, 50000);
   const idRelay = await createFromJSON(peerIdRelayJson);
   const nodeListener = await createLibp2p({
-    transports: [tcp()],
+    transports: [tcp(), webSockets()],
     addresses: {
       listen: [`/ip4/0.0.0.0/tcp/${listernPort}`],
     },
@@ -39,9 +40,7 @@ async function run() {
   });
   getStreamMsg(stream, (message) => {
     console.log("111msgs", message);
-    if (message == "sayHello") {
-      postStreamMsg(stream, "hello world");
-    }
+    postStreamMsg(stream, "from listener hello world");
   });
 }
 
