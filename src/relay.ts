@@ -12,16 +12,16 @@ import {
 } from "./utils/stream.js";
 import { createLibp2p } from "libp2p";
 import { tcp } from "@libp2p/tcp";
-import { IncomingStreamData } from "@libp2p/interface";
+
 
 // store all listener
-const listenerStream: IncomingStreamData[] = [];
-let dialerStream: IncomingStreamData["stream"] = null;
+const listenerAddress: string[] = [];
+
 async function run() {
   // Create a new libp2p node with the given multi-address
   const idRelay = await createFromJSON(peerIdRelayJson);
   const nodeRelayer = await createLibp2p({
-    transports: [tcp(), webSockets()],
+    transports: [tcp()],
     peerId: idRelay,
     addresses: {
       listen: ["/ip4/0.0.0.0/tcp/10334"], //
@@ -38,28 +38,23 @@ async function run() {
 
   //1.  Handle messages for the listener protocol
   await nodeRelayer.handle("/relay/listener/1.0.0", async (data) => {
-    listenerStream.push(data);
-    // listern
-    getStreamMsg(data.stream, (listenerMsg) => {
-      dialerStream && postStreamMsg(dialerStream, listenerMsg);
-    });
+    const { stream, connection } = data;
+    // listern address
+    const address = connection.remoteAddr.toString();
+    listenerAddress.push(address);
   });
+
   //2. Handle messages for the dialer protocol
   await nodeRelayer.handle(
     "/relay/dialer/1.0.0",
-    async ({ stream: streamDialer }) => {
+    async ({ stream: streamDialer, connection }) => {
       // Read the stream and output to console
       // streamToConsole(streamDialer);
-      dialerStream = streamDialer;
-      const length = listenerStream.length;
-      getStreamMsg(streamDialer, (dialMsg) => {
-        // todo mock algorithm to choose one listener
-        const index = Math.floor(Math.random() * length);
-        const streamListener = listenerStream[index]?.stream;
-        // transform message to listener
-        console.log("111dialMsg", dialMsg);
-        streamListener && postStreamMsg(streamListener, dialMsg);
-      });
+      // todo mock algorithm to choose one listener
+      const index = Math.floor(Math.random() * listenerAddress.length);
+      const listenAddress = listenerAddress[index];
+      console.log("1111listenerAddress", listenAddress);
+      postStreamMsg(streamDialer, listenAddress);
     }
   );
   // Output listen addresses to the console

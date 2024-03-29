@@ -4,7 +4,6 @@ import { yamux } from "@chainsafe/libp2p-yamux";
 import { createFromJSON } from "@libp2p/peer-id-factory";
 import { createLibp2p } from "libp2p";
 import { tcp } from "@libp2p/tcp";
-import { webSockets } from "@libp2p/websockets";
 import peerIdRelayJson from "./peerIds/peer-id-relay.js";
 import { multiaddr } from "@multiformats/multiaddr";
 import {
@@ -20,28 +19,34 @@ async function run() {
   // generator port between 10000 to 50000
   const listernPort = generatePort(10000, 50000);
   const idRelay = await createFromJSON(peerIdRelayJson);
+
   const nodeListener = await createLibp2p({
-    transports: [tcp(), webSockets()],
+    transports: [tcp()],
     addresses: {
       listen: [`/ip4/0.0.0.0/tcp/${listernPort}`],
     },
     streamMuxers: [yamux()],
     connectionEncryption: [noise()],
   });
+
   const relayMa = multiaddr(`${relayIpAddress}${idRelay.toString()}`);
-  const stream = await nodeListener.dialProtocol(
+  const streamListener = await nodeListener.dialProtocol(
     relayMa,
-    "/relay/listener/1.0.0"
+    "/relay/listener/1.0.0",
+    {
+
+    }
   );
+  
+
   // Output listen addresses to the console
   console.log("Listener ready, listening on:", listernPort);
+
   nodeListener.getMultiaddrs().forEach((ma) => {
     console.log(ma.toString());
   });
-  getStreamMsg(stream, (message) => {
-    console.log("111msgs", message);
-    postStreamMsg(stream, "hello world->" + message);
-  });
+  const message = await getStreamMsg(streamListener);
+  console.log("111message", message);
 }
 
 // generate random port

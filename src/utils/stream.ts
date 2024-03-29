@@ -46,8 +46,8 @@ export function streamToConsole(stream) {
   );
 }
 
-export async function getStreamMsg(stream, callback) {
-  pipe(
+export async function getStreamMsg(stream) {
+  return await pipe(
     // Read from the stream (the source)
     stream.source,
     // Decode length-prefixed data
@@ -62,10 +62,9 @@ export async function getStreamMsg(stream, callback) {
         // Output the data as a utf8 string
         const message = msg.toString().replace("\n", "");
         console.log("11> " + message);
-        callback && callback(message);
         values.push(message);
       }
-      console.log("111eend", values);
+      return values;
     }
   );
 }

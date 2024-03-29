@@ -19,7 +19,7 @@ async function run() {
 
   // Create a new libp2p node on localhost with a randomly chosen port
   const nodeDialer = await createLibp2p({
-    transports: [tcp(), webSockets()],
+    transports: [tcp()],
     peerId: idDialer,
     addresses: {
       listen: ["/ip4/0.0.0.0/tcp/0"],
@@ -36,19 +36,22 @@ async function run() {
 
   // Dial to the relay
   const relayMa = multiaddr(`${relayIpAddress}${idRelay.toString()}`);
-  const stream = await nodeDialer.dialProtocol(relayMa, "/relay/dialer/1.0.0");
-  //  get listener address
-  stdinToStream(stream);
-  // streamToConsole(stream);
+  const streamRelay = await nodeDialer.dialProtocol(
+    relayMa,
+    "/relay/dialer/1.0.0"
+  );
 
-  getStreamMsg(stream, async (message) => {
-    console.log("111dailermsg", message);
-    const streamContinue = await nodeDialer.dialProtocol(
-      relayMa,
-      "/relay/dialer/1.0.0"
-    );
-    stdinToStream(streamContinue);
-  });
+  //  get listener address
+  const relayMessage = await getStreamMsg(streamRelay);
+  streamRelay.close();
+  console.log("111listenerAddress", relayMessage, relayMessage[0]);
+  if (relayMessage?.length) {
+    const streamListener = await nodeDialer.dial(relayMessage[0]);
+    stdinToStream(streamListener);
+    // get replay message from listener
+    const listenerMessage = await getStreamMsg(streamRelay);
+    console.log("111listenerMessage", listenerMessage);
+  }
   // streamRelay.sink()
 }
 
